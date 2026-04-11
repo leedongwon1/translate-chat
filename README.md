@@ -1,9 +1,9 @@
-# 🌐 Ktu-Bit Translate Chat
+# 🌐 Translate Chat
 
-> Ktu-Bit 프로젝트의 한일 팀 협업을 위한 실시간 자동 번역 채팅 툴
+> Kyu-Bit 프로젝트의 한일 팀 협업을 위한 실시간 자동 번역 채팅 툴
 
 ## 💡 기획 배경
-Ktu-Bit(양자어닐링 기반 캠퍼스 경로 최적화) 프로젝트에서
+Kyu-Bit(양자어닐링 기반 캠퍼스 경로 최적화) 프로젝트에서
 한국-일본 팀원 간 **언어 장벽** 문제를 해결하기 위해 개발했습니다.
 
 ## 🔑 주요 기능
@@ -24,4 +24,4 @@ Ktu-Bit(양자어닐링 기반 캠퍼스 경로 최적화) 프로젝트에서
 > 상대방이 일본어로 보내면 → 한국어로 자동 번역되어 표시
 
 ## 🔗 관련 프로젝트
-- [Ktu-Bit 메인 프로젝트]https://github.com/leedongwon1/ktu-bit/
+- [Kyu-Bit 메인 프로젝트]https://github.com/leedongwon1/kyu-bit/
