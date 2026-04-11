@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ktu-bit Translator Chat</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Apple SD Gothic Neo', sans-serif;
+            background-color: #1a1a2e;
+            color: #eee;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== 진입 화면 ===== */
+        .entry-screen {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            gap: 18px;
+            animation: fadeIn 0.5s ease;
+            padding: 20px;
+        }
+
+        .entry-screen h1 {
+            font-size: 2rem;
+            color: #e94560;
+        }
+
+        .entry-screen p {
+            color: #aaa;
+            font-size: 0.95rem;
+            text-align: center;
+        }
+
+        .lang-select {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .lang-btn {
+            padding: 12px 28px;
+            border: 2px solid #e94560;
+            background: transparent;
+            color: #e94560;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .lang-btn:hover, .lang-btn.active {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .name-input {
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            background: #16213e;
+            color: #eee;
+            font-size: 1rem;
+            width: 260px;
+            text-align: center;
+        }
+
+        .name-input::placeholder { color: #666; }
+
+        .room-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-btn {
+            padding: 12px 36px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            min-width: 200px;
+        }
+
+        .btn-create {
+            background: #e94560;
+            color: #fff;
+        }
+
+        .btn-create:hover { background: #c73652; }
+
+        .btn-join {
+            background: #0f3460;
+            color: #fff;
+        }
+
+        .btn-join:hover { background: #1a4a7a; }
+
+        .room-code-display {
+            background: #16213e;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.4rem;
+            letter-spacing: 5px;
+            color: #e94560;
+            font-weight: bold;
+        }
+
+        .small-text {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .divider {
+            color: #444;
+            margin: 5px 0;
+            font-size: 0.9rem;
+        }
+
+        #roomCodeArea {
+            display: none;
+            text-align: center;
+        }
+
+        /* ===== 채팅 화면 ===== */
+        .chat-screen {
+            display: none;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        .chat-header {
+            background: #16213e;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a2a4a;
+            flex-shrink: 0;
+        }
+
+        .chat-header h2 {
+            font-size: 1.05rem;
+            color: #e94560;
+        }
+
+        .chat-header .room-info {
+            font-size: 0.8rem;
+            color: #888;
+        }
+
+        .online-users {
+            background: #0f3460;
+            padding: 8px 20px;
+            font-size: 0.85rem;
+            color: #aaa;
+            border-bottom: 1px solid #2a2a4a;
+            flex-shrink: 0;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .message {
+            max-width: 75%;
+            animation: slideUp 0.3s ease;
+        }
+
+        .message.mine { align-self: flex-end; }
+        .message.other { align-self: flex-start; }
+
+        .message .sender {
+            font-size: 0.78rem;
+            color: #888;
+            margin-bottom: 4px;
+            padding: 0 4px;
+        }
+
+        .message.mine .sender { text-align: right; }
+
+        .message .bubble {
+            border-radius: 16px;
+            padding: 14px 18px;
+        }
+
+        .message.mine .bubble {
+            background: #e94560;
+            color: #fff;
+            border-bottom-right-radius: 4px;
+        }
+
+        .message.other .bubble {
+            background: #16213e;
+            color: #eee;
+            border-bottom-left-radius: 4px;
+        }
+
+        .bubble .translated {
+            font-size: 1.15rem;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .bubble .original {
+            font-size: 0.78rem;
+            color: rgba(255,255,255,0.4);
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.12);
+        }
+
+        .chat-input-area {
+            background: #16213e;
+            padding: 14px 18px;
+            display: flex;
+            gap: 10px;
+            border-top: 1px solid #2a2a4a;
+            flex-shrink: 0;
+        }
+
+        .chat-input-area input {
+            flex: 1;
+            padding: 13px 16px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            background: #0f3460;
+            color: #eee;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        .chat-input-area input:focus { border-color: #e94560; }
+
+        .send-btn {
+            padding: 13px 22px;
+            background: #e94560;
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .send-btn:hover { background: #c73652; }
+
+        .system-msg {
+            text-align: center;
+            color: #555;
+            font-size: 0.83rem;
+            padding: 6px;
+        }
+
+        /* ===== 애니메이션 ===== */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-messages::-webkit-scrollbar { width: 5px; }
+        .chat-messages::-webkit-scrollbar-track { background: transparent; }
+        .chat-messages::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+
+        @media (max-width: 500px) {
+            .entry-screen h1 { font-size: 1.4rem; }
+            .message { max-width: 88%; }
+            .lang-btn { padding: 10px 20px; font-size: 0.9rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- ===== 진입 화면 ===== -->
+    <div class="entry-screen" id="entryScreen">
+        <h1>💬 Translator Chat</h1>
+        <p>자신의 언어를 선택하고, 이름을 입력한 뒤<br>톡방을 개설하거나 참여하세요</p>
+
+        <div class="lang-select">
+            <button class="lang-btn" data-lang="ko" onclick="selectLang(this)">🇰🇷 한국어</button>
+            <button class="lang-btn" data-lang="ja" onclick="selectLang(this)">🇯🇵 日本語</button>
+            <button class="lang-btn" data-lang="en" onclick="selectLang(this)">🇺🇸 English</button>
+            <button class="lang-btn" data-lang="zh" onclick="selectLang(this)">🇨🇳 中文</button>
+        </div>
+
+        <input type="text" class="name-input" id="nameInput" placeholder="이름을 입력하세요 (예: 이동원)">
+
+        <div class="room-section">
+            <button class="action-btn btn-create" onclick="createRoom()">🔑 톡방 개설</button>
+
+            <div id="roomCodeArea">
+                <p class="small-text">아래 코드를 팀원에게 공유하세요</p>
+                <div class="room-code-display" id="roomCodeDisplay"></div>
+                <button class="action-btn btn-join" onclick="enterChat()" style="margin-top:12px;">입장하기</button>
+            </div>
+
+            <div class="divider">── 또는 ──</div>
+
+            <input type="text" class="name-input" id="joinCodeInput" placeholder="초대 코드 입력" maxlength="6" style="letter-spacing:3px; text-transform:uppercase;">
+            <button class="action-btn btn-join" onclick="joinRoom()">🚪 톡방 참여</button>
+        </div>
+    </div>
+
+    <!-- ===== 채팅 화면 ===== -->
+    <div class="chat-screen" id="chatScreen">
+        <div class="chat-header">
+            <h2>💬 Translator Chat</h2>
+            <span class="room-info" id="chatRoomInfo"></span>
+        </div>
+        <div class="online-users" id="onlineUsers">참여자: -</div>
+
+        <div class="chat-messages" id="chatMessages"></div>
+
+        <div class="chat-input-area">
+            <input type="text" id="chatInput" placeholder="메시지를 입력하세요..." onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="send-btn" onclick="sendMessage()">전송</button>
+        </div>
+    </div>
+    <!-- ===== Firebase SDK ===== -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+    <!-- 🔐 Firebase 설정 파일 (config.js는 .gitignore로 보호됨) -->
+    <script src="config.js"></script>
+
+    <script>
+        // ============================================================
+        // 🔥 firebaseConfig는 config.js에서 로드됩니다
+        // ============================================================
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // ===== 상태 =====
+        let myLang = null;
+        let myName = '';
+        let roomCode = '';
+        let roomRef = null;
+        let renderedKeys = new Set();
+
+        // ===== Google Translate (비공식 무료 API) =====
+        async function translateText(text, fromLang, toLang) {
+            if (fromLang === toLang) return text;
+            try {
+                const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${fromLang}&tl=${toLang}&dt=t&q=${encodeURIComponent(text)}`;
+                const res = await fetch(url);
+                const data = await res.json();
+                return data[0].map(item => item[0]).join('');
+            } catch (e) {
+                return text;
+            }
+        }
+
+        // ===== 언어 선택 =====
+        function selectLang(btn) {
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            myLang = btn.dataset.lang;
+        }
+
+        // ===== 톡방 개설 =====
+        function createRoom() {
+            if (!validateEntry()) return;
+            roomCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('roomCodeDisplay').textContent = roomCode;
+            document.getElementById('roomCodeArea').style.display = 'block';
+        }
+
+        // ===== 톡방 참여 =====
+        function joinRoom() {
+            if (!validateEntry()) return;
+            const code = document.getElementById('joinCodeInput').value.trim().toUpperCase();
+            if (!code) { alert('초대 코드를 입력해주세요!'); return; }
+            roomCode = code;
+            enterChat();
+        }
+
+        // ===== 입력 검증 =====
+        function validateEntry() {
+            if (!myLang) { alert('먼저 언어를 선택해주세요!'); return false; }
+            const name = document.getElementById('nameInput').value.trim();
+            if (!name) { alert('이름을 입력해주세요!'); return false; }
+            myName = name;
+            return true;
+        }
+
+        // ===== 채팅 입장 =====
+        function enterChat() {
+            if (!myName) {
+                myName = document.getElementById('nameInput').value.trim();
+                if (!myName) { alert('이름을 입력해주세요!'); return; }
+            }
+
+            const langNames = { ko: '한국어', ja: '日本語', en: 'English', zh: '中文' };
+
+            document.getElementById('entryScreen').style.display = 'none';
+            document.getElementById('chatScreen').style.display = 'flex';
+            document.getElementById('chatRoomInfo').textContent = `Room: ${roomCode}`;
+
+            roomRef = db.ref('rooms/' + roomCode);
+
+            // 참여자 등록
+            const memberRef = roomRef.child('members').child(myName);
+            memberRef.set({ lang: myLang, name: myName, joinedAt: Date.now() });
+            memberRef.onDisconnect().remove();
+
+            // 입장 시스템 메시지 전송
+            roomRef.child('messages').push({
+                type: 'system',
+                text: `${myName}님이 입장했습니다`,
+                timestamp: Date.now()
+            });
+
+            // 참여자 목록 실시간 감지
+            roomRef.child('members').on('value', (snapshot) => {
+                const members = snapshot.val();
+                if (members) {
+                    const names = Object.keys(members).map(k => {
+                        const m = members[k];
+                        const flag = { ko: '🇰🇷', ja: '🇯🇵', en: '🇺🇸', zh: '🇨🇳' }[m.lang] || '🌐';
+                        return `${flag} ${m.name}`;
+                    });
+                    document.getElementById('onlineUsers').textContent = '참여자: ' + names.join('  ·  ');
+                }
+            });
+
+            // 메시지 실시간 수신
+            roomRef.child('messages').on('child_added', async (snapshot) => {
+                const key = snapshot.key;
+                if (renderedKeys.has(key)) return;
+                renderedKeys.add(key);
+
+                const msg = snapshot.val();
+
+                if (msg.type === 'system') {
+                    addSystemMessage(msg.text);
+                    return;
+                }
+
+                if (msg.senderName === myName) {
+                    // 내 메시지 — 원문만 표시
+                    addMyMessageUI(msg.text, msg.senderName);
+                } else {
+                    // 상대방 메시지 — 번역해서 표시
+                    const translated = await translateText(msg.text, msg.senderLang, myLang);
+                    addOtherMessageUI(msg.senderName, translated, msg.text);
+                }
+            });
+        }
+
+        // ===== 메시지 전송 =====
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const text = input.value.trim();
+            if (!text) return;
+            input.value = '';
+
+            roomRef.child('messages').push({
+                type: 'chat',
+                senderName: myName,
+                senderLang: myLang,
+                text: text,
+                timestamp: Date.now()
+            });
+        }
+
+        // ===== UI 렌더링 =====
+        function addMyMessageUI(text, name) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message mine';
+            div.innerHTML = `
+                <div class="sender">${esc(name)}</div>
+                <div class="bubble">
+                    <div class="translated">${esc(text)}</div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addOtherMessageUI(name, translated, original) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'message other';
+            div.innerHTML = `
+                <div class="sender">${esc(name)}</div>
+                <div class="bubble">
+                    <div class="translated">${esc(translated)}</div>
+                    <div class="original">${esc(original)}</div>
+                </div>
+            `;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function addSystemMessage(text) {
+            const container = document.getElementById('chatMessages');
+            const div = document.createElement('div');
+            div.className = 'system-msg';
+            div.textContent = text;
+            container.appendChild(div);
+            container.scrollTop = container.scrollHeight;
+        }
+
+        function esc(text) {
+            const d = document.createElement('div');
+            d.textContent = text;
+            return d.innerHTML;
+        }
+    </script>
+
+</body>
+</html>
