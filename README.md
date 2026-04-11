@@ -24,4 +24,4 @@ Ktu-Bit(양자어닐링 기반 캠퍼스 경로 최적화) 프로젝트에서
 > 상대방이 일본어로 보내면 → 한국어로 자동 번역되어 표시
 
 ## 🔗 관련 프로젝트
-- [Ktu-Bit 메인 프로젝트 (BoW)](링크)
+- [Ktu-Bit 메인 프로젝트]https://github.com/leedongwon1/ktu-bit/
